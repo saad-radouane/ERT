@@ -1,5 +1,3 @@
-# ERT
-
 # ETR – Emergency Trail Rescue
 
 **ETR** is an integrated outdoor safety and ecosystem management platform. It helps hikers and trail runners move safely, even without cellular coverage, and gives park managers and rescue organizations a real-time view of trail conditions.
