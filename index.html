@@ -1,0 +1,1817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#1B5E20">
+<title>ETR - Emergency Trail Rescue</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+/* ========== CSS CUSTOM PROPERTIES ========== */
+:root {
+  --green-900: #1B5E20;
+  --green-800: #2E7D32;
+  --green-700: #388E3C;
+  --green-600: #43A047;
+  --green-500: #4CAF50;
+  --green-400: #66BB6A;
+  --green-300: #81C784;
+  --green-100: #C8E6C9;
+  --green-50: #E8F5E9;
+
+  --orange-700: #FF6F00;
+  --orange-500: #FF9800;
+  --orange-300: #FFB74D;
+  --orange-100: #FFE0B2;
+
+  --red-700: #D32F2F;
+  --red-500: #F44336;
+  --red-300: #E57373;
+  --red-100: #FFCDD2;
+
+  --brown-700: #5D4037;
+  --brown-500: #795548;
+  --brown-300: #A1887F;
+
+  --blue-500: #2196F3;
+  --blue-300: #64B5F6;
+
+  --bg: #F5F7F5;
+  --card-bg: rgba(255,255,255,0.92);
+  --card-border: rgba(255,255,255,0.3);
+  --text-primary: #1a1a1a;
+  --text-secondary: #666;
+  --text-muted: #999;
+  --shadow: 0 4px 24px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.12);
+  --radius: 16px;
+  --radius-sm: 10px;
+  --radius-xs: 6px;
+  --nav-height: 72px;
+  --header-height: 56px;
+  --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ========== RESET & BASE ========== */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body {
+  height: 100%;
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background: var(--bg);
+  color: var(--text-primary);
+  overflow: hidden;
+  -webkit-tap-highlight-color: transparent;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* ========== SPLASH SCREEN ========== */
+#splash {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, var(--green-900) 0%, var(--green-700) 50%, var(--green-500) 100%);
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+#splash.hide { opacity: 0; transform: scale(1.1); pointer-events: none; }
+#splash .logo-icon {
+  width: 90px; height: 90px;
+  background: rgba(255,255,255,0.15);
+  border-radius: 24px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 42px; color: white;
+  animation: splashPulse 1.5s ease infinite;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.2);
+}
+#splash h1 { color: white; font-size: 32px; font-weight: 800; margin-top: 20px; letter-spacing: -0.5px; }
+#splash p { color: rgba(255,255,255,0.8); font-size: 14px; margin-top: 8px; font-weight: 400; }
+#splash .splash-loader {
+  width: 48px; height: 48px; margin-top: 40px;
+  border: 3px solid rgba(255,255,255,0.2);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+@keyframes splashPulse { 0%,100% { transform: scale(1); } 50% { transform: scale(1.08); } }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ========== MOUNTAIN SVG HEADER BG ========== */
+.mountain-bg {
+  position: absolute; top: 0; left: 0; right: 0; height: 220px; z-index: 0;
+  background: linear-gradient(180deg, var(--green-900) 0%, var(--green-800) 60%, transparent 100%);
+  overflow: hidden;
+}
+.mountain-bg svg { position: absolute; bottom: 0; width: 100%; height: 100px; }
+.mountain-bg svg path { fill: var(--bg); }
+
+/* ========== APP SHELL ========== */
+#app {
+  height: 100%; display: flex; flex-direction: column;
+  max-width: 428px; margin: 0 auto;
+  position: relative; overflow: hidden;
+  background: var(--bg);
+}
+
+/* ========== HEADER ========== */
+.app-header {
+  height: var(--header-height);
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 20px;
+  position: relative; z-index: 10;
+  color: white;
+  flex-shrink: 0;
+}
+.app-header .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.5px; }
+.app-header .logo span { color: var(--green-300); }
+.app-header .header-actions { display: flex; gap: 12px; }
+.app-header .header-actions button {
+  background: rgba(255,255,255,0.15); border: none; color: white;
+  width: 36px; height: 36px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; cursor: pointer;
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+.app-header .header-actions button:active { transform: scale(0.9); }
+
+/* ========== SCREENS CONTAINER ========== */
+.screens {
+  flex: 1; overflow: hidden; position: relative;
+}
+.screen {
+  position: absolute; inset: 0;
+  overflow-y: auto; overflow-x: hidden;
+  padding: 0 0 calc(var(--nav-height) + 20px) 0;
+  opacity: 0; transform: translateX(30px);
+  transition: opacity 0.35s ease, transform 0.35s ease;
+  pointer-events: none;
+  -webkit-overflow-scrolling: touch;
+}
+.screen.active {
+  opacity: 1; transform: translateX(0);
+  pointer-events: auto;
+}
+.screen-content { padding: 0 16px; }
+
+/* ========== BOTTOM NAV ========== */
+.bottom-nav {
+  height: var(--nav-height);
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px);
+  border-top: 1px solid rgba(0,0,0,0.06);
+  display: flex; align-items: center; justify-content: space-around;
+  padding-bottom: env(safe-area-inset-bottom, 0);
+  flex-shrink: 0;
+  position: relative; z-index: 100;
+}
+.nav-item {
+  display: flex; flex-direction: column; align-items: center;
+  gap: 4px; cursor: pointer; padding: 8px 16px;
+  transition: var(--transition); border: none; background: none;
+  color: var(--text-muted); font-size: 10px; font-weight: 500;
+  font-family: inherit;
+}
+.nav-item i { font-size: 22px; transition: var(--transition); }
+.nav-item.active { color: var(--green-700); }
+.nav-item.active i { transform: translateY(-2px); }
+.nav-item:active { transform: scale(0.9); }
+
+/* ========== CARDS ========== */
+.card {
+  background: var(--card-bg);
+  border-radius: var(--radius);
+  padding: 20px;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,0.04);
+  margin-bottom: 16px;
+  backdrop-filter: blur(10px);
+  transition: var(--transition);
+}
+.card:active { transform: scale(0.98); }
+
+.card-title {
+  font-size: 16px; font-weight: 700;
+  margin-bottom: 12px; display: flex;
+  align-items: center; gap: 8px;
+}
+.card-title i { font-size: 18px; }
+
+/* ========== HERO SECTION (Home) ========== */
+.hero-section {
+  background: linear-gradient(135deg, var(--green-900), var(--green-700));
+  border-radius: 0 0 28px 28px;
+  padding: 16px 20px 28px;
+  color: white;
+  margin-bottom: 20px;
+  position: relative; overflow: hidden;
+}
+.hero-section::after {
+  content: '';
+  position: absolute; bottom: 0; left: 0; right: 0; height: 60px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 60'%3E%3Cpath d='M0 60 L50 25 L100 45 L160 15 L220 35 L280 10 L340 30 L400 5 L400 60Z' fill='rgba(255,255,255,0.06)'/%3E%3C/svg%3E") no-repeat bottom;
+  background-size: cover;
+}
+.hero-greeting { font-size: 14px; opacity: 0.8; font-weight: 400; }
+.hero-name { font-size: 26px; font-weight: 800; margin: 4px 0 16px; letter-spacing: -0.5px; }
+
+.weather-widget {
+  display: flex; align-items: center; gap: 12px;
+  background: rgba(255,255,255,0.12);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255,255,255,0.1);
+  position: relative; z-index: 1;
+}
+.weather-icon { font-size: 32px; }
+.weather-info { flex: 1; }
+.weather-temp { font-size: 24px; font-weight: 700; }
+.weather-desc { font-size: 12px; opacity: 0.8; }
+.weather-loc { font-size: 11px; opacity: 0.6; }
+
+/* ========== STATS ROW ========== */
+.stats-row {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 16px;
+}
+.stat-card {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 14px 12px;
+  text-align: center;
+  box-shadow: var(--shadow);
+  border: 1px solid rgba(0,0,0,0.04);
+}
+.stat-value {
+  font-size: 28px; font-weight: 800;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.stat-value.warning { background: linear-gradient(135deg, var(--orange-700), var(--orange-500)); -webkit-background-clip: text; background-clip: text; }
+.stat-value.danger { background: linear-gradient(135deg, var(--red-700), var(--red-500)); -webkit-background-clip: text; background-clip: text; }
+.stat-label { font-size: 11px; color: var(--text-secondary); margin-top: 4px; font-weight: 500; }
+
+/* ========== ALERT CAROUSEL ========== */
+.alerts-section { margin-bottom: 16px; }
+.section-title {
+  font-size: 18px; font-weight: 700; margin-bottom: 12px;
+  display: flex; align-items: center; gap: 8px;
+}
+.alerts-scroll {
+  display: flex; gap: 12px; overflow-x: auto;
+  padding-bottom: 8px; scroll-snap-type: x mandatory;
+  -ms-overflow-style: none; scrollbar-width: none;
+}
+.alerts-scroll::-webkit-scrollbar { display: none; }
+.alert-card {
+  min-width: 260px; scroll-snap-align: start;
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  color: white; position: relative; overflow: hidden;
+  flex-shrink: 0;
+}
+.alert-card.critical { background: linear-gradient(135deg, #c62828, var(--red-700)); }
+.alert-card.warning { background: linear-gradient(135deg, #e65100, var(--orange-700)); }
+.alert-card.info { background: linear-gradient(135deg, #1565c0, var(--blue-500)); }
+.alert-card .alert-type { font-size: 11px; text-transform: uppercase; letter-spacing: 1px; opacity: 0.9; font-weight: 600; }
+.alert-card .alert-title { font-size: 16px; font-weight: 700; margin: 6px 0; }
+.alert-card .alert-loc { font-size: 12px; opacity: 0.8; display: flex; align-items: center; gap: 4px; }
+.alert-card .alert-time { font-size: 11px; opacity: 0.7; margin-top: 8px; }
+
+/* ========== QUICK ACTIONS ========== */
+.quick-actions {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 16px;
+}
+.action-btn {
+  background: var(--card-bg);
+  border: 1px solid rgba(0,0,0,0.04);
+  border-radius: var(--radius-sm);
+  padding: 16px 8px; display: flex;
+  flex-direction: column; align-items: center; gap: 8px;
+  cursor: pointer; transition: var(--transition);
+  box-shadow: var(--shadow);
+  font-family: inherit;
+}
+.action-btn:active { transform: scale(0.95); }
+.action-btn .action-icon {
+  width: 44px; height: 44px; border-radius: 12px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 20px; color: white;
+}
+.action-btn .action-icon.green { background: linear-gradient(135deg, var(--green-700), var(--green-500)); }
+.action-btn .action-icon.orange { background: linear-gradient(135deg, var(--orange-700), var(--orange-500)); }
+.action-btn .action-icon.blue { background: linear-gradient(135deg, #1565c0, var(--blue-500)); }
+.action-btn span { font-size: 11px; font-weight: 600; color: var(--text-primary); text-align: center; }
+
+/* ========== MAP SCREEN ========== */
+.map-container {
+  position: relative; height: calc(100vh - var(--header-height) - var(--nav-height) - 140px);
+  min-height: 400px;
+  background: #e8f0e4;
+  border-radius: var(--radius);
+  overflow: hidden;
+  margin: 0 16px 16px;
+  box-shadow: var(--shadow-lg);
+}
+.map-svg { width: 100%; height: 100%; }
+.map-overlay-top {
+  position: absolute; top: 12px; left: 12px; right: 12px;
+  display: flex; gap: 8px;
+}
+.map-chip {
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-radius: 20px;
+  padding: 8px 14px;
+  font-size: 12px; font-weight: 600;
+  display: flex; align-items: center; gap: 6px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+  border: none; cursor: pointer; font-family: inherit;
+  transition: var(--transition);
+}
+.map-chip:active { transform: scale(0.95); }
+.map-chip .dot {
+  width: 8px; height: 8px; border-radius: 50%;
+}
+.map-chip .dot.green { background: var(--green-500); }
+.map-chip .dot.orange { background: var(--orange-500); }
+.map-chip .dot.red { background: var(--red-500); }
+
+.map-legend {
+  position: absolute; bottom: 12px; left: 12px;
+  background: rgba(255,255,255,0.92);
+  backdrop-filter: blur(10px);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
+}
+.legend-item { display: flex; align-items: center; gap: 8px; font-size: 11px; margin-bottom: 4px; font-weight: 500; }
+.legend-item:last-child { margin-bottom: 0; }
+.legend-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+
+.user-position {
+  position: absolute;
+  width: 16px; height: 16px;
+  background: var(--blue-500);
+  border: 3px solid white;
+  border-radius: 50%;
+  box-shadow: 0 0 0 6px rgba(33,150,243,0.25);
+  animation: pulseUser 2s ease infinite;
+  transform: translate(-50%, -50%);
+  z-index: 10;
+}
+@keyframes pulseUser {
+  0%, 100% { box-shadow: 0 0 0 6px rgba(33,150,243,0.25); }
+  50% { box-shadow: 0 0 0 14px rgba(33,150,243,0.08); }
+}
+
+.hazard-pin {
+  position: absolute; transform: translate(-50%, -100%);
+  cursor: pointer; z-index: 5;
+  transition: var(--transition);
+}
+.hazard-pin:hover, .hazard-pin:active { transform: translate(-50%, -100%) scale(1.2); z-index: 20; }
+.hazard-pin .pin-icon {
+  width: 32px; height: 38px;
+  border-radius: 50% 50% 50% 0;
+  transform: rotate(-45deg);
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.hazard-pin .pin-icon i { transform: rotate(45deg); }
+.hazard-pin.critical .pin-icon { background: var(--red-700); }
+.hazard-pin.warning .pin-icon { background: var(--orange-700); }
+.hazard-pin.info .pin-icon { background: var(--blue-500); }
+
+.pin-popup {
+  display: none;
+  position: absolute; bottom: calc(100% + 8px); left: 50%;
+  transform: translateX(-50%);
+  background: white; border-radius: var(--radius-sm);
+  padding: 12px 16px; min-width: 180px;
+  box-shadow: var(--shadow-lg);
+  z-index: 30; font-size: 12px;
+}
+.pin-popup.show { display: block; animation: fadeInUp 0.2s ease; }
+.pin-popup .popup-title { font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.pin-popup .popup-severity { font-size: 11px; font-weight: 600; padding: 2px 8px; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+.pin-popup .popup-severity.high { background: var(--red-100); color: var(--red-700); }
+.pin-popup .popup-severity.medium { background: var(--orange-100); color: var(--orange-700); }
+.pin-popup .popup-coords { color: var(--text-muted); font-size: 11px; }
+
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateX(-50%) translateY(8px); }
+  to { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* ========== REPORT SCREEN ========== */
+.camera-viewfinder {
+  background: #1a1a1a;
+  border-radius: var(--radius);
+  height: 240px;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  margin: 0 16px 16px;
+}
+.viewfinder-corners {
+  position: absolute; inset: 20px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-radius: 8px;
+}
+.viewfinder-corners::before, .viewfinder-corners::after {
+  content: ''; position: absolute;
+  width: 24px; height: 24px;
+}
+.camera-btn {
+  width: 64px; height: 64px;
+  background: white; border: 4px solid rgba(255,255,255,0.5);
+  border-radius: 50%; cursor: pointer;
+  position: relative; z-index: 2;
+  transition: var(--transition);
+}
+.camera-btn:active { transform: scale(0.85); }
+.camera-btn::after {
+  content: ''; position: absolute; inset: 4px;
+  background: var(--green-500); border-radius: 50%;
+  transition: var(--transition);
+}
+.camera-label {
+  color: rgba(255,255,255,0.7);
+  font-size: 12px; margin-top: 12px;
+  position: relative; z-index: 2;
+  font-weight: 500;
+}
+
+.hazard-types {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  gap: 10px; margin-bottom: 16px; padding: 0 16px;
+}
+.hazard-type-btn {
+  background: var(--card-bg);
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 14px 8px;
+  display: flex; flex-direction: column;
+  align-items: center; gap: 6px;
+  cursor: pointer; transition: var(--transition);
+  font-family: inherit; font-size: 11px; font-weight: 600;
+  color: var(--text-primary);
+  box-shadow: var(--shadow);
+}
+.hazard-type-btn:active { transform: scale(0.95); }
+.hazard-type-btn.selected { border-color: var(--green-500); background: var(--green-50); }
+.hazard-type-btn i { font-size: 24px; color: var(--green-700); }
+
+.gps-info {
+  background: var(--green-50);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px; margin: 0 16px 16px;
+  display: flex; align-items: center; gap: 10px;
+  font-size: 13px;
+}
+.gps-info i { color: var(--green-700); font-size: 18px; }
+.gps-info .coords { font-weight: 600; font-family: 'Courier New', monospace; }
+
+.submit-report-btn {
+  width: calc(100% - 32px); margin: 0 16px 16px;
+  padding: 16px;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  border: none; border-radius: var(--radius-sm);
+  color: white; font-size: 16px; font-weight: 700;
+  cursor: pointer; transition: var(--transition);
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  font-family: inherit;
+}
+.submit-report-btn:active { transform: scale(0.97); opacity: 0.9; }
+.submit-report-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+.recent-reports { padding: 0 16px; }
+.report-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 14px 0; border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.report-item:last-child { border-bottom: none; }
+.report-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  color: white; font-size: 16px; flex-shrink: 0;
+}
+.report-icon.red { background: linear-gradient(135deg, var(--red-700), var(--red-500)); }
+.report-icon.orange { background: linear-gradient(135deg, var(--orange-700), var(--orange-500)); }
+.report-icon.green { background: linear-gradient(135deg, var(--green-700), var(--green-500)); }
+.report-info { flex: 1; }
+.report-info .report-name { font-weight: 600; font-size: 14px; }
+.report-info .report-detail { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+.report-badge {
+  font-size: 10px; font-weight: 700; padding: 4px 10px;
+  border-radius: 12px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.report-badge.critical { background: var(--red-100); color: var(--red-700); }
+.report-badge.medium { background: var(--orange-100); color: var(--orange-700); }
+.report-badge.resolved { background: var(--green-100); color: var(--green-800); }
+
+/* ========== AI ANALYSIS MODAL ========== */
+.modal-overlay {
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.5);
+  display: none; align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(4px);
+}
+.modal-overlay.show { display: flex; animation: fadeIn 0.3s ease; }
+.modal-content {
+  background: white; border-radius: 20px;
+  padding: 28px; width: 100%; max-width: 340px;
+  text-align: center;
+  animation: scaleIn 0.3s ease;
+}
+@keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes scaleIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+
+.ai-spinner {
+  width: 60px; height: 60px; margin: 0 auto 16px;
+  border: 4px solid var(--green-100);
+  border-top-color: var(--green-700);
+  border-radius: 50%;
+  animation: spin 0.8s linear infinite;
+}
+.ai-result-icon {
+  width: 72px; height: 72px; margin: 0 auto 16px;
+  background: var(--green-50);
+  border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 32px; color: var(--green-700);
+}
+.modal-title { font-size: 20px; font-weight: 700; margin-bottom: 8px; }
+.modal-desc { font-size: 14px; color: var(--text-secondary); margin-bottom: 20px; line-height: 1.5; }
+.modal-btn {
+  padding: 14px 28px;
+  background: linear-gradient(135deg, var(--green-700), var(--green-500));
+  border: none; border-radius: 12px;
+  color: white; font-size: 15px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  transition: var(--transition);
+}
+.modal-btn:active { transform: scale(0.95); }
+
+/* ========== SAFETY SCREEN ========== */
+.sos-btn-container { display: flex; justify-content: center; margin: 20px 16px; }
+.sos-btn {
+  width: 120px; height: 120px;
+  background: linear-gradient(135deg, var(--red-700), var(--red-500));
+  border: 6px solid var(--red-300);
+  border-radius: 50%;
+  color: white; font-size: 28px; font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 0 0 8px rgba(211,47,47,0.15), 0 8px 32px rgba(211,47,47,0.3);
+  transition: var(--transition);
+  font-family: inherit;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 4px;
+}
+.sos-btn i { font-size: 32px; }
+.sos-btn:active { transform: scale(0.9); box-shadow: 0 0 0 12px rgba(211,47,47,0.25), 0 4px 16px rgba(211,47,47,0.4); }
+
+.safety-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.safety-toggle:last-child { border-bottom: none; }
+.toggle-info { display: flex; align-items: center; gap: 12px; }
+.toggle-icon {
+  width: 40px; height: 40px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; color: white;
+}
+.toggle-icon.green { background: linear-gradient(135deg, var(--green-700), var(--green-500)); }
+.toggle-icon.blue { background: linear-gradient(135deg, #1565c0, var(--blue-500)); }
+.toggle-icon.orange { background: linear-gradient(135deg, var(--orange-700), var(--orange-500)); }
+.toggle-icon.red { background: linear-gradient(135deg, var(--red-700), var(--red-500)); }
+.toggle-label { font-weight: 600; font-size: 14px; }
+.toggle-desc { font-size: 11px; color: var(--text-secondary); }
+
+/* Toggle switch */
+.switch {
+  width: 50px; height: 28px;
+  background: #ddd; border-radius: 14px;
+  position: relative; cursor: pointer;
+  transition: var(--transition);
+  border: none;
+}
+.switch.on { background: var(--green-500); }
+.switch::after {
+  content: ''; position: absolute;
+  width: 22px; height: 22px;
+  background: white; border-radius: 50%;
+  top: 3px; left: 3px;
+  transition: var(--transition);
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+}
+.switch.on::after { left: 25px; }
+
+/* Fall detection countdown */
+.fall-countdown {
+  display: none;
+  background: linear-gradient(135deg, var(--red-700), #b71c1c);
+  border-radius: var(--radius);
+  padding: 24px; margin: 0 16px 16px;
+  color: white; text-align: center;
+}
+.fall-countdown.active { display: block; animation: shakeAlert 0.5s ease; }
+@keyframes shakeAlert {
+  0%, 100% { transform: translateX(0); }
+  20%, 60% { transform: translateX(-5px); }
+  40%, 80% { transform: translateX(5px); }
+}
+.countdown-number {
+  font-size: 64px; font-weight: 900;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.countdown-label { font-size: 14px; opacity: 0.9; margin-top: 4px; }
+.countdown-btns { display: flex; gap: 12px; margin-top: 16px; justify-content: center; }
+.countdown-btns button {
+  padding: 12px 24px; border-radius: 12px;
+  font-weight: 700; font-size: 14px; cursor: pointer;
+  border: none; font-family: inherit; transition: var(--transition);
+}
+.btn-ok { background: white; color: var(--green-700); }
+.btn-sos { background: rgba(255,255,255,0.2); color: white; border: 2px solid rgba(255,255,255,0.5) !important; }
+
+.mesh-status {
+  display: flex; align-items: center; gap: 8px;
+  padding: 12px 16px; border-radius: var(--radius-sm);
+  font-size: 13px; font-weight: 500;
+  margin: 0 16px 12px;
+}
+.mesh-status.connected { background: var(--green-50); color: var(--green-800); }
+.mesh-status .pulse-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--green-500);
+  animation: pulseUser 1.5s ease infinite;
+}
+
+.emergency-contacts { padding: 0 16px; }
+.contact-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+}
+.contact-item:last-child { border-bottom: none; }
+.contact-avatar {
+  width: 42px; height: 42px; border-radius: 50%;
+  background: var(--green-100); display: flex;
+  align-items: center; justify-content: center;
+  font-weight: 700; color: var(--green-800); font-size: 16px;
+}
+.contact-name { font-weight: 600; font-size: 14px; }
+.contact-role { font-size: 11px; color: var(--text-secondary); }
+.contact-call {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: var(--green-500); border: none;
+  color: white; font-size: 14px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  margin-left: auto;
+}
+
+/* ========== DASHBOARD SCREEN ========== */
+.dashboard-header {
+  background: linear-gradient(135deg, #1a237e, #283593);
+  border-radius: 0 0 28px 28px;
+  padding: 16px 20px 24px;
+  color: white; margin-bottom: 20px;
+}
+.dash-title { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+.dash-subtitle { font-size: 12px; opacity: 0.7; }
+
+.dash-metrics {
+  display: grid; grid-template-columns: repeat(2, 1fr);
+  gap: 10px; padding: 0 16px; margin-bottom: 16px;
+}
+.dash-metric {
+  background: var(--card-bg);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+  box-shadow: var(--shadow);
+}
+.dash-metric-value { font-size: 32px; font-weight: 800; }
+.dash-metric-label { font-size: 11px; color: var(--text-secondary); margin-top: 2px; font-weight: 500; }
+.dash-metric-change {
+  display: inline-flex; align-items: center; gap: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-top: 4px;
+}
+.dash-metric-change.up { background: var(--red-100); color: var(--red-700); }
+.dash-metric-change.down { background: var(--green-100); color: var(--green-800); }
+
+/* Heatmap */
+.heatmap-container { padding: 0 16px; margin-bottom: 16px; }
+.heatmap-grid {
+  display: grid; grid-template-columns: repeat(8, 1fr);
+  gap: 3px;
+}
+.heat-cell {
+  aspect-ratio: 1; border-radius: 4px;
+  transition: var(--transition);
+}
+.heat-cell.h0 { background: var(--green-100); }
+.heat-cell.h1 { background: var(--green-300); }
+.heat-cell.h2 { background: #FFE082; }
+.heat-cell.h3 { background: var(--orange-300); }
+.heat-cell.h4 { background: var(--orange-500); }
+.heat-cell.h5 { background: var(--red-300); }
+.heat-cell.h6 { background: var(--red-700); }
+
+.trail-status-table { padding: 0 16px; margin-bottom: 16px; }
+.trail-row {
+  display: flex; align-items: center; gap: 10px;
+  padding: 12px 0;
+  border-bottom: 1px solid rgba(0,0,0,0.06);
+  font-size: 13px;
+}
+.trail-row:last-child { border-bottom: none; }
+.trail-status-dot { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; }
+.trail-name { font-weight: 600; flex: 1; }
+.trail-badge {
+  font-size: 10px; font-weight: 700;
+  padding: 4px 10px; border-radius: 8px;
+  text-transform: uppercase;
+}
+.trail-badge.open { background: var(--green-100); color: var(--green-800); }
+.trail-badge.closed { background: var(--red-100); color: var(--red-700); }
+.trail-badge.caution { background: var(--orange-100); color: var(--orange-700); }
+
+.timeline { padding: 0 16px 16px; }
+.timeline-item {
+  display: flex; gap: 12px; padding-bottom: 16px;
+  position: relative;
+}
+.timeline-item::before {
+  content: ''; position: absolute;
+  left: 15px; top: 32px; bottom: 0;
+  width: 2px; background: var(--green-100);
+}
+.timeline-item:last-child::before { display: none; }
+.timeline-dot {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--green-50); flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--green-700); font-size: 14px;
+  z-index: 1;
+}
+.timeline-content { flex: 1; }
+.timeline-date { font-size: 11px; color: var(--text-muted); font-weight: 500; }
+.timeline-text { font-size: 13px; font-weight: 600; margin-top: 2px; }
+.timeline-desc { font-size: 12px; color: var(--text-secondary); margin-top: 2px; }
+
+.export-btn {
+  width: calc(100% - 32px); margin: 0 16px 16px;
+  padding: 14px;
+  background: linear-gradient(135deg, #1a237e, #3949ab);
+  border: none; border-radius: var(--radius-sm);
+  color: white; font-size: 14px; font-weight: 700;
+  cursor: pointer; font-family: inherit;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+}
+
+/* ========== VOICE CHECK-IN ========== */
+.voice-checkin {
+  display: none;
+  position: fixed; inset: 0; z-index: 1000;
+  background: rgba(0,0,0,0.7);
+  align-items: center; justify-content: center;
+  padding: 20px;
+  backdrop-filter: blur(8px);
+}
+.voice-checkin.show { display: flex; }
+.voice-content {
+  background: white; border-radius: 24px;
+  padding: 32px; text-align: center;
+  width: 100%; max-width: 320px;
+  animation: scaleIn 0.3s ease;
+}
+.voice-wave {
+  display: flex; align-items: center; justify-content: center;
+  gap: 4px; height: 60px; margin: 16px 0;
+}
+.voice-wave .bar {
+  width: 4px; border-radius: 2px;
+  background: var(--green-500);
+  animation: voiceBar 0.8s ease infinite;
+}
+.voice-wave .bar:nth-child(1) { height: 16px; animation-delay: 0s; }
+.voice-wave .bar:nth-child(2) { height: 28px; animation-delay: 0.1s; }
+.voice-wave .bar:nth-child(3) { height: 40px; animation-delay: 0.2s; }
+.voice-wave .bar:nth-child(4) { height: 28px; animation-delay: 0.3s; }
+.voice-wave .bar:nth-child(5) { height: 16px; animation-delay: 0.4s; }
+@keyframes voiceBar {
+  0%, 100% { transform: scaleY(1); }
+  50% { transform: scaleY(1.8); }
+}
+.voice-question { font-size: 22px; font-weight: 700; margin-bottom: 8px; }
+.voice-sub { font-size: 14px; color: var(--text-secondary); margin-bottom: 24px; }
+.voice-btns { display: flex; gap: 12px; justify-content: center; }
+.voice-btns button {
+  padding: 14px 28px; border-radius: 14px;
+  font-size: 15px; font-weight: 700;
+  cursor: pointer; border: none;
+  font-family: inherit; transition: var(--transition);
+}
+.voice-btns button:active { transform: scale(0.95); }
+.btn-confirm { background: var(--green-500); color: white; }
+.btn-emergency { background: var(--red-100); color: var(--red-700); }
+
+/* ========== NOTIFICATION TOAST ========== */
+.toast {
+  position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-100px);
+  background: white; border-radius: 14px;
+  padding: 14px 20px; z-index: 2000;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.15);
+  display: flex; align-items: center; gap: 12px;
+  max-width: 360px; width: calc(100% - 40px);
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+.toast.show { transform: translateX(-50%) translateY(0); }
+.toast-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: white; flex-shrink: 0;
+}
+.toast-text { font-size: 13px; font-weight: 600; }
+.toast-sub { font-size: 11px; color: var(--text-secondary); }
+
+/* ========== SECTION PADDED ========== */
+.section-padded { padding: 0 16px; margin-bottom: 16px; }
+
+/* Scrollbar hide */
+.screen::-webkit-scrollbar { display: none; }
+.screen { -ms-overflow-style: none; scrollbar-width: none; }
+</style>
+</head>
+<body>
+
+<!-- SPLASH SCREEN -->
+<div id="splash">
+  <div class="logo-icon"><i class="fas fa-mountain-sun"></i></div>
+  <h1>ETR</h1>
+  <p>Emergency Trail Rescue</p>
+  <div class="splash-loader"></div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <!-- HEADER -->
+  <div class="hero-bg" style="position:absolute;top:0;left:0;right:0;height:220px;background:linear-gradient(180deg,var(--green-900) 0%,var(--green-800) 60%,transparent 100%);z-index:0;pointer-events:none;">
+    <svg viewBox="0 0 400 60" style="position:absolute;bottom:0;width:100%;" preserveAspectRatio="none">
+      <path d="M0 60 L60 30 L120 50 L180 15 L240 40 L300 10 L360 35 L400 20 L400 60Z" fill="var(--bg)"/>
+    </svg>
+  </div>
+
+  <header class="app-header">
+    <div class="logo">ETR <span>·</span> Mountain Safety</div>
+    <div class="header-actions">
+      <button onclick="toggleNotifications()" title="Notifications"><i class="fas fa-bell"></i></button>
+      <button title="Profile"><i class="fas fa-user"></i></button>
+    </div>
+  </header>
+
+  <!-- SCREENS -->
+  <div class="screens">
+
+    <!-- HOME SCREEN -->
+    <div class="screen active" id="screen-home">
+      <div class="hero-section">
+        <div class="hero-greeting">Good afternoon 🌤️</div>
+        <div class="hero-name">Welcome, Trail Explorer</div>
+        <div class="weather-widget">
+          <div class="weather-icon">⛅</div>
+          <div class="weather-info">
+            <div class="weather-temp">12°C</div>
+            <div class="weather-desc">Partly cloudy · Safe conditions</div>
+            <div class="weather-loc"><i class="fas fa-map-pin"></i> Val di Sole, Dolomites</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="screen-content">
+        <div class="stats-row">
+          <div class="stat-card">
+            <div class="stat-value warning" id="stat-hazards">3</div>
+            <div class="stat-label">Active Hazards</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value" id="stat-hikers">47</div>
+            <div class="stat-label">Nearby Hikers</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-value">92</div>
+            <div class="stat-label">Safety Index</div>
+          </div>
+        </div>
+
+        <div class="alerts-section">
+          <div class="section-title"><i class="fas fa-triangle-exclamation" style="color:var(--orange-500)"></i> Active Trail Alerts</div>
+          <div class="alerts-scroll">
+            <div class="alert-card critical">
+              <div class="alert-type">⚠️ Critical Hazard</div>
+              <div class="alert-title">Collapsed Bridge</div>
+              <div class="alert-loc"><i class="fas fa-location-dot"></i> Trail 204, km 3.2</div>
+              <div class="alert-time">Reported 2h ago · AI Verified</div>
+            </div>
+            <div class="alert-card warning">
+              <div class="alert-type">⚠️ Warning</div>
+              <div class="alert-title">Partial Landslide</div>
+              <div class="alert-loc"><i class="fas fa-location-dot"></i> Trail 108, km 1.8</div>
+              <div class="alert-time">Reported 5h ago · 3 confirmations</div>
+            </div>
+            <div class="alert-card info">
+              <div class="alert-type">ℹ️ Advisory</div>
+              <div class="alert-title">Snow on Trail</div>
+              <div class="alert-loc"><i class="fas fa-location-dot"></i> 2,400m elevation, Presanella Peak</div>
+              <div class="alert-time">Reported today · AI Verified</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-title"><i class="fas fa-bolt" style="color:var(--green-600)"></i> Quick Actions</div>
+        <div class="quick-actions">
+          <button class="action-btn" onclick="switchTab(2)">
+            <div class="action-icon orange"><i class="fas fa-camera"></i></div>
+            <span>Report Hazard</span>
+          </button>
+          <button class="action-btn" onclick="switchTab(3)">
+            <div class="action-icon green"><i class="fas fa-shield-halved"></i></div>
+            <span>Safety Status</span>
+          </button>
+          <button class="action-btn" onclick="switchTab(1)">
+            <div class="action-icon blue"><i class="fas fa-map-location-dot"></i></div>
+            <span>Trail Map</span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- MAP SCREEN -->
+    <div class="screen" id="screen-map">
+      <div style="padding:12px 16px 0;">
+        <div class="section-title" style="color:white;position:relative;z-index:1;">
+          <i class="fas fa-map-location-dot"></i> Live Trail Map
+        </div>
+      </div>
+      <div class="map-container" id="mapContainer">
+        <svg class="map-svg" viewBox="0 0 400 500" xmlns="http://www.w3.org/2000/svg">
+          <!-- Background terrain -->
+          <defs>
+            <linearGradient id="terrainGrad" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#a5d6a7"/>
+              <stop offset="100%" stop-color="#c8e6c9"/>
+            </linearGradient>
+            <filter id="shadow">
+              <feDropShadow dx="0" dy="1" stdDeviation="2" flood-opacity="0.15"/>
+            </filter>
+          </defs>
+          <rect width="400" height="500" fill="url(#terrainGrad)"/>
+
+          <!-- Contour lines -->
+          <path d="M0 100 Q100 80 200 90 Q300 100 400 85" stroke="#90a98c" stroke-width="0.5" fill="none" opacity="0.4"/>
+          <path d="M0 160 Q80 140 160 155 Q240 170 320 145 Q380 130 400 140" stroke="#90a98c" stroke-width="0.5" fill="none" opacity="0.4"/>
+          <path d="M0 220 Q120 200 200 215 Q280 230 400 205" stroke="#90a98c" stroke-width="0.5" fill="none" opacity="0.4"/>
+          <path d="M0 300 Q100 280 200 290 Q300 300 400 285" stroke="#90a98c" stroke-width="0.5" fill="none" opacity="0.3"/>
+          <path d="M0 380 Q150 365 250 375 Q350 385 400 370" stroke="#90a98c" stroke-width="0.5" fill="none" opacity="0.3"/>
+
+          <!-- Trees -->
+          <circle cx="30" cy="70" r="8" fill="#66bb6a" opacity="0.4"/>
+          <circle cx="50" cy="55" r="6" fill="#81c784" opacity="0.3"/>
+          <circle cx="370" cy="120" r="10" fill="#66bb6a" opacity="0.4"/>
+          <circle cx="350" cy="100" r="7" fill="#81c784" opacity="0.3"/>
+          <circle cx="60" cy="350" r="9" fill="#66bb6a" opacity="0.4"/>
+          <circle cx="340" cy="400" r="8" fill="#81c784" opacity="0.3"/>
+          <circle cx="100" cy="420" r="12" fill="#66bb6a" opacity="0.3"/>
+          <circle cx="300" cy="460" r="10" fill="#81c784" opacity="0.3"/>
+
+          <!-- Water / stream -->
+          <path d="M320 0 Q310 60 330 120 Q350 180 320 240 Q290 300 310 360 Q330 420 300 500"
+                stroke="#64b5f6" stroke-width="3" fill="none" opacity="0.6" stroke-linecap="round"/>
+
+          <!-- Trail - Green (safe) segments -->
+          <path d="M40 460 Q80 430 120 400 Q160 370 180 330"
+                stroke="#4caf50" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+
+          <!-- Trail - Yellow (caution) segment -->
+          <path d="M180 330 Q200 290 220 250"
+                stroke="#ffc107" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+
+          <!-- Trail - Red (danger) segment -->
+          <path d="M220 250 Q240 210 260 180"
+                stroke="#f44336" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+
+          <!-- Trail continues green -->
+          <path d="M260 180 Q280 150 300 120 Q320 90 350 60"
+                stroke="#4caf50" stroke-width="4" fill="none" stroke-linecap="round" stroke-linejoin="round" filter="url(#shadow)"/>
+
+          <!-- Secondary trail -->
+          <path d="M180 330 Q140 310 100 290 Q60 270 40 240"
+                stroke="#4caf50" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-dasharray="8 4" opacity="0.7"/>
+
+          <!-- Trail markers -->
+          <circle cx="120" cy="400" r="3" fill="white" stroke="#4caf50" stroke-width="1.5"/>
+          <circle cx="180" cy="330" r="3" fill="white" stroke="#ffc107" stroke-width="1.5"/>
+          <circle cx="260" cy="180" r="3" fill="white" stroke="#f44336" stroke-width="1.5"/>
+          <circle cx="350" cy="60" r="3" fill="white" stroke="#4caf50" stroke-width="1.5"/>
+
+          <!-- Labels -->
+          <text x="355" y="55" font-size="8" fill="#5d4037" font-weight="600" font-family="Inter,sans-serif">Alpine Refuge</text>
+          <text x="35" y="475" font-size="8" fill="#5d4037" font-weight="600" font-family="Inter,sans-serif">Trailhead</text>
+          <text x="35" y="235" font-size="7" fill="#5d4037" font-weight="500" font-family="Inter,sans-serif" opacity="0.7">Trail 108</text>
+          <text x="130" cy="395" font-size="7" fill="#5d4037" font-weight="500" font-family="Inter,sans-serif" opacity="0.7">Trail 204</text>
+        </svg>
+
+        <!-- User Position -->
+        <div class="user-position" style="top: 66%; left: 30%;"></div>
+
+        <!-- Hazard Pins -->
+        <div class="hazard-pin critical" style="top:50%;left:55%;" onclick="togglePopup(this)">
+          <div class="pin-icon"><i class="fas fa-bridge"></i></div>
+          <div class="pin-popup">
+            <div class="popup-title">Collapsed Bridge</div>
+            <div class="popup-severity high">Critical</div>
+            <div class="popup-coords"><i class="fas fa-location-dot"></i> 46.3312°N, 10.8801°E</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">AI Verified · 2h ago</div>
+          </div>
+        </div>
+
+        <div class="hazard-pin warning" style="top:36%;left:65%;" onclick="togglePopup(this)">
+          <div class="pin-icon"><i class="fas fa-hill-rockslide"></i></div>
+          <div class="pin-popup">
+            <div class="popup-title">Partial Landslide</div>
+            <div class="popup-severity medium">Moderate</div>
+            <div class="popup-coords"><i class="fas fa-location-dot"></i> 46.3398°N, 10.8845°E</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">3 confirmations · 5h ago</div>
+          </div>
+        </div>
+
+        <div class="hazard-pin info" style="top:18%;left:78%;" onclick="togglePopup(this)">
+          <div class="pin-icon"><i class="fas fa-snowflake"></i></div>
+          <div class="pin-popup">
+            <div class="popup-title">Snow on Trail</div>
+            <div class="popup-severity medium">Moderate</div>
+            <div class="popup-coords"><i class="fas fa-location-dot"></i> 46.3521°N, 10.8910°E</div>
+            <div style="font-size:11px;color:var(--text-muted);margin-top:4px;">AI Verified · Today</div>
+          </div>
+        </div>
+
+        <!-- Map overlay -->
+        <div class="map-overlay-top">
+          <button class="map-chip"><span class="dot green"></span> Safe: 4</button>
+          <button class="map-chip"><span class="dot orange"></span> Caution: 2</button>
+          <button class="map-chip"><span class="dot red"></span> Hazard: 1</button>
+        </div>
+
+        <div class="map-legend">
+          <div class="legend-item"><div class="legend-dot" style="background:var(--green-500)"></div> Safe trail section</div>
+          <div class="legend-item"><div class="legend-dot" style="background:#ffc107"></div> Caution advised</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--red-500)"></div> Active danger zone</div>
+          <div class="legend-item"><div class="legend-dot" style="background:var(--blue-500)"></div> Your GPS location</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- REPORT SCREEN -->
+    <div class="screen" id="screen-report">
+      <div style="padding:12px 16px 0;">
+        <div class="section-title" style="color:white;position:relative;z-index:1;">
+          <i class="fas fa-camera"></i> Report Trail Hazard
+        </div>
+      </div>
+
+      <div class="camera-viewfinder" id="cameraView">
+        <div class="viewfinder-corners"></div>
+        <button class="camera-btn" onclick="simulatePhoto()"></button>
+        <div class="camera-label">Tap shutter to capture hazard photo</div>
+      </div>
+
+      <div class="section-padded">
+        <div class="section-title"><i class="fas fa-tags" style="color:var(--orange-500)"></i> Hazard Category</div>
+      </div>
+      <div class="hazard-types">
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Collapsed Bridge')">
+          <i class="fas fa-bridge-water"></i> Bridge Collapse
+        </button>
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Wasp Nest')">
+          <i class="fas fa-bugs"></i> Wasp Nest
+        </button>
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Landslide')">
+          <i class="fas fa-hill-rockslide"></i> Landslide
+        </button>
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Snow Pack')">
+          <i class="fas fa-snowflake"></i> Snow / Ice
+        </button>
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Rockfall')">
+          <i class="fas fa-mountain"></i> Rockfall
+        </button>
+        <button class="hazard-type-btn" onclick="selectHazardType(this, 'Other Hazard')">
+          <i class="fas fa-circle-exclamation"></i> Other
+        </button>
+      </div>
+
+      <div class="gps-info">
+        <i class="fas fa-satellite-dish"></i>
+        <div>
+          <div style="font-weight:600;font-size:13px;">Live GPS Geotag</div>
+          <div class="coords" id="gpsCoords">46.3245°N, 10.8756°E</div>
+        </div>
+        <div style="margin-left:auto;font-size:11px;color:var(--green-700);font-weight:600;">± 3m</div>
+      </div>
+
+      <button class="submit-report-btn" id="submitBtn" disabled onclick="submitReport()">
+        <i class="fas fa-paper-plane"></i> Submit Hazard Report
+      </button>
+
+      <div class="section-padded">
+        <div class="section-title"><i class="fas fa-clock-rotate-left" style="color:var(--text-muted)"></i> Recent Trail Reports</div>
+      </div>
+      <div class="recent-reports" id="recentReports">
+        <div class="report-item">
+          <div class="report-icon red"><i class="fas fa-bridge-water"></i></div>
+          <div class="report-info">
+            <div class="report-name">Collapsed Bridge</div>
+            <div class="report-detail">Trail 204 · 2h ago</div>
+          </div>
+          <span class="report-badge critical">Critical</span>
+        </div>
+        <div class="report-item">
+          <div class="report-icon orange"><i class="fas fa-hill-rockslide"></i></div>
+          <div class="report-info">
+            <div class="report-name">Partial Landslide</div>
+            <div class="report-detail">Trail 108 · 5h ago</div>
+          </div>
+          <span class="report-badge medium">Moderate</span>
+        </div>
+        <div class="report-item">
+          <div class="report-icon green"><i class="fas fa-check"></i></div>
+          <div class="report-info">
+            <div class="report-name">Trail Restored</div>
+            <div class="report-detail">Trail 301 · Yesterday</div>
+          </div>
+          <span class="report-badge resolved">Resolved</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAFETY SCREEN -->
+    <div class="screen" id="screen-safety">
+      <div style="padding:12px 16px 0;">
+        <div class="section-title" style="color:white;position:relative;z-index:1;">
+          <i class="fas fa-shield-halved"></i> Safety & Emergency Center
+        </div>
+      </div>
+
+      <!-- Fall Detection Countdown (hidden by default) -->
+      <div class="fall-countdown" id="fallCountdown">
+        <div style="font-size:14px;font-weight:600;margin-bottom:4px;">⚠️ SEVERE IMPACT / FALL DETECTED</div>
+        <div class="countdown-number" id="countdownNum">180</div>
+        <div class="countdown-label">seconds before automated SOS broadcast</div>
+        <div class="countdown-btns">
+          <button class="btn-ok" onclick="cancelFallAlert()"><i class="fas fa-check"></i> I'm OK</button>
+          <button class="btn-sos" onclick="triggerSOS()"><i class="fas fa-phone"></i> Send SOS Now</button>
+        </div>
+      </div>
+
+      <!-- SOS Button -->
+      <div class="sos-btn-container">
+        <button class="sos-btn" onclick="triggerSOS()">
+          <i class="fas fa-phone-volume"></i>
+          SOS
+        </button>
+      </div>
+
+      <!-- Mesh Network Status -->
+      <div class="mesh-status connected">
+        <div class="pulse-dot"></div>
+        <span><strong>Offline Mesh Network Active</strong> · <span id="meshDevices">3</span> peers in range</span>
+      </div>
+      <div class="mesh-status connected" style="background:var(--green-50);margin-top:-4px;">
+        <i class="fas fa-rotate" style="color:var(--green-700);font-size:14px;"></i>
+        <span><strong id="syncCount">12</strong> hazards synced peer-to-peer</span>
+      </div>
+
+      <!-- Safety Toggles -->
+      <div class="card" style="margin:16px;">
+        <div class="card-title"><i class="fas fa-gear" style="color:var(--green-700)"></i> Safety & Wearable Settings</div>
+
+        <div class="safety-toggle">
+          <div class="toggle-info">
+            <div class="toggle-icon green"><i class="fas fa-person-falling-burst"></i></div>
+            <div>
+              <div class="toggle-label">Passive Fall Detection</div>
+              <div class="toggle-desc">Clip-on wearable sensor accelerometer</div>
+            </div>
+          </div>
+          <button class="switch on" onclick="this.classList.toggle('on')" id="fallToggle"></button>
+        </div>
+
+        <div class="safety-toggle">
+          <div class="toggle-info">
+            <div class="toggle-icon blue"><i class="fas fa-wifi"></i></div>
+            <div>
+              <div class="toggle-label">Offline Mesh Relay</div>
+              <div class="toggle-desc">Device-to-device hazard sync via BLE</div>
+            </div>
+          </div>
+          <button class="switch on" onclick="this.classList.toggle('on')"></button>
+        </div>
+
+        <div class="safety-toggle">
+          <div class="toggle-info">
+            <div class="toggle-icon orange"><i class="fas fa-volume-high"></i></div>
+            <div>
+              <div class="toggle-label">Acoustic Beacon</div>
+              <div class="toggle-desc">High-frequency siren on impact</div>
+            </div>
+          </div>
+          <button class="switch on" onclick="this.classList.toggle('on')"></button>
+        </div>
+
+        <div class="safety-toggle">
+          <div class="toggle-info">
+            <div class="toggle-icon red"><i class="fas fa-microphone"></i></div>
+            <div>
+              <div class="toggle-label">Emergency Voice Check-In</div>
+              <div class="toggle-desc">Hands-free voice prompt verification</div>
+            </div>
+          </div>
+          <button class="switch on" onclick="this.classList.toggle('on')"></button>
+        </div>
+      </div>
+
+      <!-- Wearable Status -->
+      <div class="card" style="margin:0 16px 16px;">
+        <div class="card-title"><i class="fas fa-watch" style="color:var(--blue-500)"></i> Wearable Clip Sensor</div>
+        <div style="display:flex;align-items:center;gap:16px;">
+          <div style="width:56px;height:56px;background:linear-gradient(135deg,#1565c0,var(--blue-500));border-radius:14px;display:flex;align-items:center;justify-content:center;color:white;font-size:24px;">
+            <i class="fas fa-microchip"></i>
+          </div>
+          <div style="flex:1;">
+            <div style="font-weight:700;font-size:15px;">ETR Active Clip-On</div>
+            <div style="font-size:12px;color:var(--text-secondary);">Paired via Bluetooth Low Energy</div>
+            <div style="display:flex;align-items:center;gap:8px;margin-top:6px;">
+              <div style="background:var(--green-100);color:var(--green-800);font-size:11px;font-weight:700;padding:2px 8px;border-radius:4px;">● Connected</div>
+              <div style="font-size:11px;color:var(--text-muted);">Battery: 87%</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Simulate Fall Button -->
+      <div class="section-padded">
+        <button class="submit-report-btn" style="width:100%;margin:0;background:linear-gradient(135deg,var(--orange-700),var(--orange-500));" onclick="simulateFall()">
+          <i class="fas fa-person-falling-burst"></i> Simulate Fall Detection Trigger
+        </button>
+      </div>
+
+      <!-- Emergency Contacts -->
+      <div class="card" style="margin:0 16px 16px;">
+        <div class="card-title"><i class="fas fa-address-book" style="color:var(--red-500)"></i> Emergency Dispatch & Contacts</div>
+        <div class="contact-item">
+          <div class="contact-avatar">118</div>
+          <div>
+            <div class="contact-name">Alpine Mountain Rescue</div>
+            <div class="contact-role">Mountain SAR & Helicopter Dispatch</div>
+          </div>
+          <button class="contact-call"><i class="fas fa-phone"></i></button>
+        </div>
+        <div class="contact-item">
+          <div class="contact-avatar">112</div>
+          <div>
+            <div class="contact-name">European Emergency (112)</div>
+            <div class="contact-role">Unified civil protection dispatcher</div>
+          </div>
+          <button class="contact-call"><i class="fas fa-phone"></i></button>
+        </div>
+        <div class="contact-item">
+          <div class="contact-avatar" style="background:var(--blue-300);color:#1565c0;">ICE</div>
+          <div>
+            <div class="contact-name">Designated Emergency Contact</div>
+            <div class="contact-role">In Case of Emergency (ICE) Family</div>
+          </div>
+          <button class="contact-call"><i class="fas fa-phone"></i></button>
+        </div>
+      </div>
+    </div>
+
+    <!-- DASHBOARD SCREEN -->
+    <div class="screen" id="screen-dashboard">
+      <div class="dashboard-header">
+        <div style="display:flex;align-items:center;gap:12px;margin-bottom:12px;">
+          <div style="width:40px;height:40px;background:rgba(255,255,255,0.15);border-radius:10px;display:flex;align-items:center;justify-content:center;">
+            <i class="fas fa-chart-line" style="color:white;font-size:18px;"></i>
+          </div>
+          <div>
+            <div class="dash-title">Mountain Management Dashboard</div>
+            <div class="dash-subtitle">Adamello-Brenta Natural Park · CAI Alpine Club</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;">
+          <div style="background:rgba(255,255,255,0.15);border-radius:8px;padding:6px 12px;font-size:11px;font-weight:600;">
+            <i class="fas fa-calendar"></i> Last sync: Today 14:30
+          </div>
+        </div>
+      </div>
+
+      <div class="dash-metrics">
+        <div class="dash-metric">
+          <div class="dash-metric-value" style="color:var(--orange-700);" id="dashHazards">7</div>
+          <div class="dash-metric-label">Active Hazards</div>
+          <div class="dash-metric-change up"><i class="fas fa-arrow-up"></i> +2 today</div>
+        </div>
+        <div class="dash-metric">
+          <div class="dash-metric-value" style="color:var(--green-700);" id="dashResolved">23</div>
+          <div class="dash-metric-label">Resolved (This Month)</div>
+          <div class="dash-metric-change down"><i class="fas fa-arrow-down"></i> -15% time</div>
+        </div>
+        <div class="dash-metric">
+          <div class="dash-metric-value" style="color:var(--blue-500);" id="dashHikers">142</div>
+          <div class="dash-metric-label">Hikers on Trails</div>
+          <div class="dash-metric-change down"><i class="fas fa-arrow-up" style="transform:rotate(0)"></i> Normal Flow</div>
+        </div>
+        <div class="dash-metric">
+          <div class="dash-metric-value" style="color:var(--brown-500);">18</div>
+          <div class="dash-metric-label">Monitored Trails</div>
+          <div class="dash-metric-change down"><i class="fas fa-check"></i> 94% Coverage</div>
+        </div>
+      </div>
+
+      <div class="section-padded">
+        <div class="section-title"><i class="fas fa-fire" style="color:var(--red-500)"></i> Trail Criticality Heatmap</div>
+      </div>
+      <div class="heatmap-container">
+        <div class="card" style="padding:16px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;">
+            <span style="font-size:12px;font-weight:600;">Monitored Trail Sectors</span>
+            <span style="font-size:11px;color:var(--text-muted);">Past 7 Days</span>
+          </div>
+          <div class="heatmap-grid" id="heatmapGrid"></div>
+          <div style="display:flex;justify-content:space-between;margin-top:8px;font-size:10px;color:var(--text-muted);">
+            <span>Low Risk</span>
+            <div style="display:flex;gap:2px;">
+              <div style="width:12px;height:8px;background:var(--green-100);border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:var(--green-300);border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:#FFE082;border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:var(--orange-300);border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:var(--orange-500);border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:var(--red-300);border-radius:2px;"></div>
+              <div style="width:12px;height:8px;background:var(--red-700);border-radius:2px;"></div>
+            </div>
+            <span>High Risk</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-padded">
+        <div class="section-title"><i class="fas fa-route" style="color:var(--brown-500)"></i> Official Trail Status</div>
+      </div>
+      <div class="card" style="margin:0 16px 16px;padding:8px 16px;">
+        <div class="trail-row">
+          <div class="trail-status-dot" style="background:var(--green-500)"></div>
+          <div class="trail-name">Trail 101 - Genoa Valley</div>
+          <span class="trail-badge open">Open</span>
+        </div>
+        <div class="trail-row">
+          <div class="trail-status-dot" style="background:var(--red-500)"></div>
+          <div class="trail-name">Trail 204 - Waterfalls Path</div>
+          <span class="trail-badge closed">Closed</span>
+        </div>
+        <div class="trail-row">
+          <div class="trail-status-dot" style="background:var(--orange-500)"></div>
+          <div class="trail-name">Trail 108 - Mt. Presanella</div>
+          <span class="trail-badge caution">Caution</span>
+        </div>
+        <div class="trail-row">
+          <div class="trail-status-dot" style="background:var(--green-500)"></div>
+          <div class="trail-name">Trail 301 - Ritorto Lake</div>
+          <span class="trail-badge open">Open</span>
+        </div>
+        <div class="trail-row">
+          <div class="trail-status-dot" style="background:var(--green-500)"></div>
+          <div class="trail-name">Trail 405 - High Alpine Pasture</div>
+          <span class="trail-badge open">Open</span>
+        </div>
+      </div>
+
+      <div class="section-padded">
+        <div class="section-title"><i class="fas fa-timeline" style="color:var(--green-700)"></i> Official Authority Updates</div>
+      </div>
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-dot"><i class="fas fa-hammer"></i></div>
+          <div class="timeline-content">
+            <div class="timeline-date">October 21, 2026</div>
+            <div class="timeline-text">Trail 204 Bridge Repair Underway</div>
+            <div class="timeline-desc">Bridge reconstruction work initiated. Estimated duration: 2 weeks.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"><i class="fas fa-check"></i></div>
+          <div class="timeline-content">
+            <div class="timeline-date">October 18, 2026</div>
+            <div class="timeline-text">Trail 301 Reopened</div>
+            <div class="timeline-desc">Rockfall debris cleared. Path fully inspected and open for all hikers.</div>
+          </div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-dot"><i class="fas fa-triangle-exclamation"></i></div>
+          <div class="timeline-content">
+            <div class="timeline-date">October 15, 2026</div>
+            <div class="timeline-text">High Altitude Winter Weather Warning</div>
+            <div class="timeline-desc">Early snowfall expected above 2,200m. Exposed ridge traverses discouraged.</div>
+          </div>
+        </div>
+      </div>
+
+      <button class="export-btn" onclick="showToast('Data Export Started','Generating incident CSV report...','\uf019','#1a237e')">
+        <i class="fas fa-file-export"></i> Export Management Report (CSV)
+      </button>
+    </div>
+
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <nav class="bottom-nav">
+    <button class="nav-item active" onclick="switchTab(0)">
+      <i class="fas fa-house"></i><span>Home</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(1)">
+      <i class="fas fa-map"></i><span>Map</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(2)">
+      <i class="fas fa-camera"></i><span>Report</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(3)">
+      <i class="fas fa-shield-halved"></i><span>Safety</span>
+    </button>
+    <button class="nav-item" onclick="switchTab(4)">
+      <i class="fas fa-chart-line"></i><span>Dashboard</span>
+    </button>
+  </nav>
+</div>
+
+<!-- AI ANALYSIS MODAL -->
+<div class="modal-overlay" id="aiModal">
+  <div class="modal-content" id="aiModalContent">
+    <div class="ai-spinner" id="aiSpinner"></div>
+    <div class="modal-title" id="aiTitle">AI Computer Vision Analysis...</div>
+    <div class="modal-desc" id="aiDesc">Computer Vision model is analyzing the scene to detect hazard type and threat severity level.</div>
+  </div>
+</div>
+
+<!-- VOICE CHECK-IN MODAL -->
+<div class="voice-checkin" id="voiceCheckin">
+  <div class="voice-content">
+    <div style="font-size:48px;margin-bottom:8px;">🎙️</div>
+    <div class="voice-question">Are you okay?</div>
+    <div class="voice-sub">Emergency passive voice check-in activated</div>
+    <div class="voice-wave">
+      <div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div><div class="bar"></div>
+    </div>
+    <div class="voice-btns">
+      <button class="btn-confirm" onclick="confirmVoiceOk()"><i class="fas fa-check"></i> Yes, I'm okay</button>
+      <button class="btn-emergency" onclick="triggerSOS()"><i class="fas fa-phone"></i> Emergency SOS</button>
+    </div>
+  </div>
+</div>
+
+<!-- NOTIFICATION TOAST -->
+<div class="toast" id="toast">
+  <div class="toast-icon" id="toastIcon" style="background:var(--green-500);">
+    <i class="fas fa-check"></i>
+  </div>
+  <div>
+    <div class="toast-text" id="toastText">Notification</div>
+    <div class="toast-sub" id="toastSub">Details</div>
+  </div>
+</div>
+
+<script>
+// ========== STATE ==========
+let currentTab = 0;
+let selectedHazardType = null;
+let photoTaken = false;
+let fallCountdownInterval = null;
+let countdownValue = 180;
+
+// ========== SPLASH SCREEN ==========
+window.addEventListener('load', () => {
+  setTimeout(() => {
+    document.getElementById('splash').classList.add('hide');
+    setTimeout(() => document.getElementById('splash').style.display = 'none', 600);
+  }, 1800);
+  generateHeatmap();
+  startRealtimeUpdates();
+});
+
+// ========== NAVIGATION ==========
+function switchTab(index) {
+  currentTab = index;
+  const screens = document.querySelectorAll('.screen');
+  const navItems = document.querySelectorAll('.nav-item');
+
+  screens.forEach((s, i) => {
+    s.classList.remove('active');
+    if (i === index) {
+      s.classList.add('active');
+      s.scrollTop = 0;
+    }
+  });
+
+  navItems.forEach((n, i) => {
+    n.classList.remove('active');
+    if (i === index) n.classList.add('active');
+  });
+
+  // Update header gradient based on screen
+  const heroBg = document.querySelector('.hero-bg');
+  if (index === 4) {
+    heroBg.style.background = 'linear-gradient(180deg, #1a237e 0%, #283593 60%, transparent 100%)';
+  } else {
+    heroBg.style.background = 'linear-gradient(180deg, var(--green-900) 0%, var(--green-800) 60%, transparent 100%)';
+  }
+
+  // Haptic feedback
+  if (navigator.vibrate) navigator.vibrate(10);
+}
+
+// ========== MAP ==========
+function togglePopup(pin) {
+  const popup = pin.querySelector('.pin-popup');
+  const wasShown = popup.classList.contains('show');
+
+  // Close all popups
+  document.querySelectorAll('.pin-popup').forEach(p => p.classList.remove('show'));
+
+  if (!wasShown) popup.classList.add('show');
+}
+
+// Close popups on map click
+document.getElementById('mapContainer')?.addEventListener('click', (e) => {
+  if (!e.target.closest('.hazard-pin')) {
+    document.querySelectorAll('.pin-popup').forEach(p => p.classList.remove('show'));
+  }
+});
+
+// ========== REPORT ==========
+function selectHazardType(btn, type) {
+  document.querySelectorAll('.hazard-type-btn').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  selectedHazardType = type;
+  updateSubmitBtn();
+  if (navigator.vibrate) navigator.vibrate(15);
+}
+
+function simulatePhoto() {
+  const view = document.getElementById('cameraView');
+  view.style.background = 'linear-gradient(135deg, #2e7d32, #1b5e20)';
+  view.innerHTML = `
+    <div style="color:white;text-align:center;z-index:2;position:relative;">
+      <i class="fas fa-check-circle" style="font-size:48px;margin-bottom:12px;animation:scaleIn 0.3s ease;"></i>
+      <div style="font-weight:700;font-size:16px;">Photo Captured</div>
+      <div style="font-size:12px;opacity:0.8;margin-top:4px;">Running automated AI verification...</div>
+    </div>
+  `;
+  photoTaken = true;
+  updateSubmitBtn();
+
+  if (navigator.vibrate) navigator.vibrate([50, 30, 50]);
+
+  // Show AI analysis modal
+  setTimeout(() => showAIAnalysis(), 800);
+}
+
+function showAIAnalysis() {
+  const modal = document.getElementById('aiModal');
+  const content = document.getElementById('aiModalContent');
+  modal.classList.add('show');
+
+  // Phase 1: Analyzing
+  setTimeout(() => {
+    // Phase 2: Result
+    content.innerHTML = `
+      <div class="ai-result-icon"><i class="fas fa-brain"></i></div>
+      <div class="modal-title">Analysis Complete</div>
+      <div class="modal-desc">
+        <div style="text-align:left;background:var(--green-50);border-radius:10px;padding:12px;margin-bottom:12px;">
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:600;">Hazard Type:</span>
+            <span style="font-weight:700;color:var(--green-800);">${selectedHazardType || 'Landslide'}</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;margin-bottom:6px;">
+            <span style="font-weight:600;">Threat Level:</span>
+            <span style="font-weight:700;color:var(--orange-700);">High</span>
+          </div>
+          <div style="display:flex;justify-content:space-between;">
+            <span style="font-weight:600;">AI Confidence:</span>
+            <span style="font-weight:700;color:var(--green-700);">94.2%</span>
+          </div>
+        </div>
+      </div>
+      <button class="modal-btn" onclick="closeAIModal()"><i class="fas fa-check"></i> Confirm & Pin</button>
+    `;
+  }, 2000);
+}
+
+function closeAIModal() {
+  document.getElementById('aiModal').classList.remove('show');
+}
+
+function updateSubmitBtn() {
+  const btn = document.getElementById('submitBtn');
+  btn.disabled = !(photoTaken && selectedHazardType);
+}
+
+function submitReport() {
+  if (!photoTaken || !selectedHazardType) return;
+
+  showToast(
+    'Hazard Reported!',
+    `${selectedHazardType} · GPS verified`,
+    '\uf058',
+    '#2e7d32'
+  );
+
+  // Add to recent reports
+  const reports = document.getElementById('recentReports');
+  const newReport = document.createElement('div');
+  newReport.className = 'report-item';
+  newReport.style.animation = 'fadeIn 0.3s ease';
+  newReport.innerHTML = `
+    <div class="report-icon orange"><i class="fas fa-clock"></i></div>
+    <div class="report-info">
+      <div class="report-name">${selectedHazardType}</div>
+      <div class="report-detail">Current location · Just now</div>
+    </div>
+    <span class="report-badge medium">Pending Sync</span>
+  `;
+  reports.insertBefore(newReport, reports.firstChild);
+
+  // Save to localStorage
+  const savedReports = JSON.parse(localStorage.getItem('etr_reports') || '[]');
+  savedReports.unshift({
+    type: selectedHazardType,
+    time: new Date().toISOString(),
+    coords: document.getElementById('gpsCoords').textContent
+  });
+  localStorage.setItem('etr_reports', JSON.stringify(savedReports));
+
+  // Reset
+  resetReportForm();
+}
+
+function resetReportForm() {
+  photoTaken = false;
+  selectedHazardType = null;
+  document.querySelectorAll('.hazard-type-btn').forEach(b => b.classList.remove('selected'));
+  document.getElementById('submitBtn').disabled = true;
+
+  const view = document.getElementById('cameraView');
+  view.style.background = '#1a1a1a';
+  view.innerHTML = `
+    <div class="viewfinder-corners"></div>
+    <button class="camera-btn" onclick="simulatePhoto()"></button>
+    <div class="camera-label">Tap shutter to capture hazard photo</div>
+  `;
+}
+
+// ========== SAFETY ==========
+function simulateFall() {
+  if (navigator.vibrate) navigator.vibrate([200, 100, 200, 100, 200]);
+
+  const countdown = document.getElementById('fallCountdown');
+  countdown.classList.add('active');
+  countdownValue = 180;
+  document.getElementById('countdownNum').textContent = countdownValue;
+
+  fallCountdownInterval = setInterval(() => {
+    countdownValue--;
+    document.getElementById('countdownNum').textContent = countdownValue;
+
+    if (countdownValue <= 0) {
+      clearInterval(fallCountdownInterval);
+      triggerSOS();
+    }
+
+    // Show voice check-in at 160 seconds
+    if (countdownValue === 160) {
+      showVoiceCheckin();
+    }
+  }, 1000);
+}
+
+function cancelFallAlert() {
+  clearInterval(fallCountdownInterval);
+  document.getElementById('fallCountdown').classList.remove('active');
+  document.getElementById('voiceCheckin').classList.remove('show');
+  showToast('Alert Cancelled', 'Fall alarm disarmed · User safe', '\uf058', '#2e7d32');
+}
+
+function triggerSOS() {
+  clearInterval(fallCountdownInterval);
+  document.getElementById('fallCountdown').classList.remove('active');
+  document.getElementById('voiceCheckin').classList.remove('show');
+
+  if (navigator.vibrate) navigator.vibrate([500, 200, 500, 200, 500]);
+
+  showToast('🚨 SOS Dispatched!', 'Mountain Rescue alerted · GPS coordinates broadcasted', '\uf095', '#d32f2f');
+}
+
+function showVoiceCheckin() {
+  document.getElementById('voiceCheckin').classList.add('show');
+}
+
+function confirmVoiceOk() {
+  document.getElementById('voiceCheckin').classList.remove('show');
+  showToast('Voice Check-In Confirmed', 'Status verified OK · Standby mode', '\uf130', '#2e7d32');
+  cancelFallAlert();
+}
+
+// ========== DASHBOARD ==========
+function generateHeatmap() {
+  const grid = document.getElementById('heatmapGrid');
+  if (!grid) return;
+  const levels = [0,0,1,0,0,1,2,0, 1,0,0,2,3,1,0,0, 0,1,3,4,5,3,1,0, 0,2,4,6,5,4,2,1, 1,1,3,5,4,3,1,0, 0,0,2,3,2,1,0,0, 0,0,1,1,1,0,0,0, 0,0,0,0,1,0,0,0];
+  grid.innerHTML = '';
+  levels.forEach(l => {
+    const cell = document.createElement('div');
+    cell.className = `heat-cell h${l}`;
+    grid.appendChild(cell);
+  });
+}
+
+// ========== TOAST NOTIFICATIONS ==========
+function showToast(text, sub, iconClass, bgColor) {
+  const toast = document.getElementById('toast');
+  const toastIcon = document.getElementById('toastIcon');
+  const toastText = document.getElementById('toastText');
+  const toastSub = document.getElementById('toastSub');
+
+  toastText.textContent = text;
+  toastSub.textContent = sub;
+  toastIcon.style.background = bgColor || 'var(--green-500)';
+
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+function toggleNotifications() {
+  showToast('3 Active Notifications', 'New verified hazard flagged nearby', '\uf0f3', 'var(--orange-500)');
+}
+
+// ========== REAL-TIME SIMULATION ==========
+function startRealtimeUpdates() {
+  // Update mesh devices count
+  setInterval(() => {
+    const meshEl = document.getElementById('meshDevices');
+    if (meshEl) meshEl.textContent = 2 + Math.floor(Math.random() * 5);
+  }, 8000);
+
+  // Update sync count
+  setInterval(() => {
+    const syncEl = document.getElementById('syncCount');
+    if (syncEl) {
+      const current = parseInt(syncEl.textContent);
+      syncEl.textContent = current + Math.floor(Math.random() * 3);
+    }
+  }, 12000);
+
+  // Simulate GPS drift
+  setInterval(() => {
+    const lat = (46.3245 + (Math.random() - 0.5) * 0.001).toFixed(4);
+    const lon = (10.8756 + (Math.random() - 0.5) * 0.001).toFixed(4);
+    const gps = document.getElementById('gpsCoords');
+    if (gps) gps.textContent = `${lat}°N, ${lon}°E`;
+  }, 5000);
+
+  // Update dashboard hikers count
+  setInterval(() => {
+    const el = document.getElementById('dashHikers');
+    if (el) {
+      const v = parseInt(el.textContent);
+      el.textContent = Math.max(80, v + Math.floor((Math.random() - 0.45) * 8));
+    }
+  }, 10000);
+}
+
+// ========== INIT ==========
+// Close modals on backdrop click
+document.getElementById('aiModal')?.addEventListener('click', (e) => {
+  if (e.target === e.currentTarget) closeAIModal();
+});
+</script>
+</body>
+</html>
